@@ -6,4 +6,4 @@ app.use('/',(req,resp)=>{
 })
 
 
-module.exports = app
+module.exports = app;
