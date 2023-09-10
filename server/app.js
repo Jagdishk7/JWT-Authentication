@@ -1,6 +1,9 @@
 const express = require('express');
 const app = express();
-const authRouter = require('./routes/authRoute')
+const authRouter = require('./routes/authRoute');
+const dbconnect = require('./config/dbConfig');
+
+dbconnect();
 
 // to parse the json data from every request ( batayega ki ye req data json type hai)
 app.use(express.json())
