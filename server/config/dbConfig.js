@@ -5,7 +5,7 @@ const MONGODB_URL = process.env.MONGODB_URL
 
 const dbconnect = ()=>{
     mongoose.connect(MONGODB_URL)
-    .then((conn)=> console.log(conn.connection.host))
+    .then((conn)=> console.log("Connected at : "+conn.connection.host))
     .catch((err)=> console.log(err.message));
 }
 
