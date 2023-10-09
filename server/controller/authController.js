@@ -1,10 +1,9 @@
 const userModel = require("../model/userSchema");
 const emailValidator = require("email-validator");
 //  Signup Function where we will write logic of signup
-const signup = async (req, resp, next) => {
+const signUp = async (req, resp, next) => {
   // destructuring json data
   const { name, email, password, confirmPassword } = req.body;
-  console.log(name, email, password, confirmPassword);
 
   // controller level validation of data
   if (!name || !email || !password || !confirmPassword) {
@@ -14,6 +13,7 @@ const signup = async (req, resp, next) => {
     });
   }
 
+    //validate email using "email-validator" package
   const validEmail = emailValidator.validate(email);
 
   if (!validEmail) {
@@ -52,34 +52,58 @@ const signup = async (req, resp, next) => {
   }
 };
 
-const signin = async (req, resp, next) => {
-  const {email,password } = req.body;
+
+
+const signIn = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  // send response with error message if email or password is missing
   if (!email || !password) {
-    return resp.status(400).json({
+    return res.status(400).json({
       success: false,
-      message: "Every field is required",
+      message: "email and password are required"
     });
   }
 
-  const user = await userModel
-    .findOne({
-      email,
-    })
-    .select("+password"); // this will select password field from this object
+  try {
+    // check user exist or not
+    const user = await userModel
+      .findOne({
+        email
+      })
+      .select("+password");
 
-  if(!user || user.password !== password){
-    return resp.status(400).json({
+    // If user is null or the password is incorrect return response with error message
+    if (!user || user.password !== password) {
+      return res.status(400).json({
+        success: true,
+        message: "invalid credentials"
+      });
+    }
+
+    // Create jwt token using userSchema method( jwtToken() )
+    const token = user.jwtToken();
+    user.password = undefined; // to prevent password leakage
+
+    const cookieOption = {
+      maxAge: 24 * 60 * 60 * 1000, //24hr
+      httpOnly: true // by using this user is not able to modify  the cookie in client side
+    };
+
+    res.cookie("token", token, cookieOption);
+    res.status(200).json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    return res.status(400).json({
       success: false,
-      message: "Invalid credentials",
+      message: error.message
     });
   }
-  return resp.status(200).json({
-    success: true,
-    message: "Sign in successful"
-  })
 };
 
 module.exports = {
-  signup,
-  signin,
+  signUp,
+  signIn
 };
