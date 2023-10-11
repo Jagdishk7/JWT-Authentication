@@ -21,7 +21,7 @@ const userSchema = new Schema(
     },
     password: {
       type: String,
-      select: false,
+      select: false, // false means that this field will not be selected after find method by default. if we wanna use password we have to select password
     },
     forgotPasswordToken: {
       type: String,

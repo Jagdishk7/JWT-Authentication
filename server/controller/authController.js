@@ -86,8 +86,8 @@ const signIn = async (req, res, next) => {
     user.password = undefined; // to prevent password leakage
 
     const cookieOption = {
-      maxAge: 24 * 60 * 60 * 1000, //24hr
-      httpOnly: true // by using this user is not able to modify  the cookie in client side
+      maxAge: 24 * 60 * 60 * 1000, //24hr validity 
+      httpOnly: true // by using this user is not be able to modify the cookie in client side
     };
 
     res.cookie("token", token, cookieOption);
@@ -103,7 +103,32 @@ const signIn = async (req, res, next) => {
   }
 };
 
+
+/******************************************************
+ * @GETUSER
+ * @route /api/auth/user
+ * @method GET
+ * @description retrieve user data from mongoDb if user is valid(jwt auth)
+ * @returns User Object
+ ******************************************************/
+
+const getUser = async (req, res, next) => {
+  const userId = req.user.id;
+  try {
+    const user = await userModel.findById(userId);
+    return res.status(200).json({
+      success: true,
+      data: user
+    });
+  } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
 module.exports = {
   signUp,
-  signIn
+  signIn,
+  getUser
 };
